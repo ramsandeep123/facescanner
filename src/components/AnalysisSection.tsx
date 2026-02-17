@@ -100,18 +100,18 @@ const AnalysisSection = () => {
   const isProcessing = isModelLoading || isAnalyzing;
 
   return (
-    <section id="analyze" className="py-24 bg-card">
-      <div className="container mx-auto px-4">
+    <section id="analyze" className="py-24 relative">
+      <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
-            <Sparkles className="w-4 h-4" />
-            <span className="text-sm font-medium">AI Analysis</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border-white/10 text-white mb-6">
+            <Sparkles className="w-4 h-4 text-purple-400" />
+            <span className="text-sm font-medium tracking-wide">AI Analysis</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-4">
-            Discover Your Face Shape
+          <h2 className="text-4xl md:text-6xl font-serif font-bold text-white mb-6 tracking-tight">
+            Discover Your <span className="text-gradient">Face Shape</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Upload a front-facing photo and let our AI determine your face shape
+          <p className="text-lg text-slate-400 max-w-2xl mx-auto font-light leading-relaxed">
+            Upload a front-facing photo and let our advanced AI determine your unique face shape with precision.
           </p>
         </div>
 
@@ -124,26 +124,29 @@ const AnalysisSection = () => {
               
               {/* Model Loading State */}
               {isModelLoading && (
-                <div className="w-full max-w-md p-6 rounded-2xl bg-background shadow-soft">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Brain className="w-5 h-5 text-primary animate-pulse" />
-                    <span className="font-medium text-foreground">{loadingMessage}</span>
+                <div className="w-full max-w-md p-8 rounded-2xl glass border-white/10">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-primary/40 blur-xl rounded-full animate-pulse" />
+                      <Brain className="w-6 h-6 text-primary relative z-10 animate-pulse" />
+                    </div>
+                    <span className="font-medium text-white text-lg">{loadingMessage}</span>
                   </div>
-                  <Progress value={loadingProgress} className="h-2" />
-                  <p className="text-sm text-muted-foreground mt-2">
-                    First-time setup • This only happens once
+                  <Progress value={loadingProgress} className="h-2 bg-white/10" indicatorClassName="bg-gradient-to-r from-purple-500 to-pink-500" />
+                  <p className="text-sm text-slate-400 mt-4 font-light">
+                    First-time setup • Optimizing neural networks...
                   </p>
                 </div>
               )}
               
               {/* Error State */}
               {error && (
-                <div className="w-full max-w-md p-6 rounded-2xl bg-destructive/10 border border-destructive/20">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                <div className="w-full max-w-md p-6 rounded-2xl bg-red-500/10 border border-red-500/20 backdrop-blur-sm">
+                  <div className="flex items-start gap-4">
+                    <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-medium text-destructive">Analysis Failed</p>
-                      <p className="text-sm text-muted-foreground mt-1">{error.message}</p>
+                      <p className="font-medium text-red-200 text-lg">Analysis Failed</p>
+                      <p className="text-sm text-red-300/80 mt-1">{error.message}</p>
                       {error.type === 'no-face' && (
                         <ul className="text-sm text-muted-foreground mt-2 space-y-1">
                           <li>• Ensure your face is clearly visible</li>

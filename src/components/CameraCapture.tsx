@@ -115,37 +115,36 @@ const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
   });
 
   return (
-    <div className="fixed inset-0 z-50 bg-foreground flex flex-col">
+    <div className="fixed inset-0 z-50 bg-black flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-4">
+      <div className="flex items-center justify-between p-6 absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/60 to-transparent">
         <button
           onClick={handleClose}
-          className="w-10 h-10 rounded-full bg-background/20 flex items-center justify-center text-background hover:bg-background/30 transition-colors"
+          className="w-12 h-12 rounded-full glass flex items-center justify-center text-white hover:bg-white/20 transition-colors"
         >
-          <X className="w-5 h-5" />
+          <X className="w-6 h-6" />
         </button>
-        <span className="text-background font-medium">Take Photo</span>
+        <span className="text-white font-medium text-lg shadow-sm">Take Photo</span>
         {!capturedImage && (
           <button
             onClick={switchCamera}
-            className="w-10 h-10 rounded-full bg-background/20 flex items-center justify-center text-background hover:bg-background/30 transition-colors"
+            className="w-12 h-12 rounded-full glass flex items-center justify-center text-white hover:bg-white/20 transition-colors"
           >
-            <SwitchCamera className="w-5 h-5" />
+            <SwitchCamera className="w-6 h-6" />
           </button>
         )}
-        {capturedImage && <div className="w-10" />}
+        {capturedImage && <div className="w-12" />}
       </div>
 
       {/* Camera View */}
-      <div className="flex-1 relative overflow-hidden">
+      <div className="flex-1 relative overflow-hidden bg-black">
         {error ? (
-          <div className="absolute inset-0 flex items-center justify-center p-8">
-            <div className="text-center">
-              <Camera className="w-16 h-16 text-background/50 mx-auto mb-4" />
-              <p className="text-background/80">{error}</p>
+          <div className="absolute inset-0 flex items-center justify-center p-8 z-10">
+            <div className="text-center max-w-xs glass-panel border-white/10">
+              <Camera className="w-16 h-16 text-white/50 mx-auto mb-4" />
+              <p className="text-white mb-6">{error}</p>
               <Button
-                variant="outline"
-                className="mt-4 border-background/50 text-background hover:bg-background/20"
+                className="w-full glass-button text-white border-none"
                 onClick={() => startCamera(facingMode)}
               >
                 Try Again
@@ -170,8 +169,11 @@ const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
               }`}
             />
             {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-foreground">
-                <div className="w-12 h-12 border-4 border-background/30 border-t-background rounded-full animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-20">
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-12 border-4 border-white/20 border-t-primary rounded-full animate-spin mb-4" />
+                  <p className="text-white/70 text-sm">Starting camera...</p>
+                </div>
               </div>
             )}
           </>
@@ -179,48 +181,51 @@ const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
 
         {/* Face guide overlay */}
         {!capturedImage && !error && !isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-[75vw] max-w-sm h-[55vh] max-h-[500px] border-2 border-dashed border-background/50 rounded-[40%] flex items-end justify-center pb-4">
-              <span className="text-background/70 text-sm">Position face here</span>
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div className="relative w-[80vw] max-w-sm h-[60vh] max-h-[500px] border-2 border-dashed border-white/40 rounded-[45%] shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]">
+               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-12 whitespace-nowrap">
+                  <span className="text-white/90 text-sm font-medium bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-md">
+                    Position face within frame
+                  </span>
+               </div>
             </div>
           </div>
         )}
       </div>
 
       {/* Controls */}
-      <div className="p-6 pb-10 flex items-center justify-center gap-8">
+      <div className="p-8 pb-12 flex items-center justify-center gap-8 absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/80 to-transparent">
         {capturedImage ? (
-          <>
+          <div className="flex gap-6 w-full max-w-sm">
             <Button
               variant="outline"
               size="lg"
               onClick={retakePhoto}
-              className="border-background/50 text-background hover:bg-background/20"
+              className="flex-1 h-14 rounded-full border-white/20 text-white bg-black/40 hover:bg-white/10 backdrop-blur-md"
             >
               Retake
             </Button>
             <Button
-              variant="hero"
+              variant="default"
               size="lg"
               onClick={confirmPhoto}
-              className="gap-2"
+              className="flex-1 h-14 rounded-full glass-button text-white border-none gap-2 hover:scale-105 transition-transform"
             >
               <Check className="w-5 h-5" />
               Use Photo
             </Button>
-          </>
+          </div>
         ) : (
           <button
             onClick={capturePhoto}
             disabled={isLoading || !!error}
-            className="w-20 h-20 rounded-full border-4 border-background flex items-center justify-center disabled:opacity-50 transition-transform hover:scale-105 active:scale-95"
+            className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center disabled:opacity-50 transition-all hover:scale-110 active:scale-95 hover:border-primary shadow-lg shadow-black/20"
           >
-            <div className="w-16 h-16 rounded-full bg-background" />
+            <div className="w-16 h-16 rounded-full bg-white transition-colors hover:bg-primary" />
           </button>
         )}
       </div>
 
-      {/* Hidden canvas for capture */}
       <canvas ref={canvasRef} className="hidden" />
     </div>
   );
