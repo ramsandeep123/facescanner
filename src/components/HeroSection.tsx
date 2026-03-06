@@ -29,7 +29,7 @@ const HeroSection = () => {
             provides personalized recommendations to help you look and feel your best.
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-in-up opacity-0 delay-300">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-in-up opacity-0 delay-300">
             <div className="relative group">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
               <button 
@@ -41,10 +41,10 @@ const HeroSection = () => {
               </button>
             </div>
             <button 
-              onClick={() => document.getElementById("face-shapes")?.scrollIntoView({ behavior: "smooth" })}
-              className="px-8 py-4 glass text-white rounded-full font-medium text-lg hover:bg-white/10 transition-colors"
+              onClick={() => window.location.href = '/eye-color'}
+              className="px-8 py-4 bg-gradient-to-r from-blue-600/60 to-cyan-600/60 backdrop-blur-md text-white rounded-full font-bold text-lg hover:scale-105 hover:bg-white/20 transition-all border border-blue-400/50 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] flex items-center gap-2"
             >
-              Learn About Shapes
+              Change Eye Color
             </button>
           </div>
           

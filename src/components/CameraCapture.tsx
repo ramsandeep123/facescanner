@@ -1,6 +1,8 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Camera, SwitchCamera, X, Check } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CameraCaptureProps {
   onCapture: (file: File) => void;
@@ -13,10 +15,12 @@ const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const startCamera = useCallback(async (facing: "user" | "environment") => {
+  const startCamera = useCallback(async (facing: "user" | "environment", deviceId?: string) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -26,12 +30,19 @@ const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
         stream.getTracks().forEach(track => track.stop());
       }
 
+      const videoConstraints: MediaTrackConstraints = {
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      };
+
+      if (deviceId) {
+        videoConstraints.deviceId = { exact: deviceId };
+      } else {
+        videoConstraints.facingMode = facing;
+      }
+
       const newStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: facing,
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
-        },
+        video: videoConstraints,
         audio: false
       });
 
@@ -53,6 +64,7 @@ const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
   const switchCamera = () => {
     const newFacing = facingMode === "user" ? "environment" : "user";
     setFacingMode(newFacing);
+    setSelectedDeviceId("");
     startCamera(newFacing);
   };
 
@@ -85,9 +97,23 @@ const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
     }
   };
 
+  useEffect(() => {
+    if (stream && devices.length === 0) {
+      navigator.mediaDevices.enumerateDevices().then(ds => {
+        const videoDevices = ds.filter(d => d.kind === 'videoinput');
+        setDevices(videoDevices);
+      }).catch(err => console.error("Error enumerating devices:", err));
+    }
+  }, [stream, devices.length]);
+
+  const handleDeviceChange = (deviceId: string) => {
+    setSelectedDeviceId(deviceId);
+    startCamera(facingMode, deviceId);
+  };
+
   const retakePhoto = () => {
     setCapturedImage(null);
-    startCamera(facingMode);
+    startCamera(facingMode, selectedDeviceId);
   };
 
   const confirmPhoto = () => {
@@ -110,12 +136,13 @@ const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
   };
 
   // Start camera on mount
-  useState(() => {
+  useEffect(() => {
     startCamera(facingMode);
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col">
+  return createPortal(
+    <div className="fixed inset-0 z-[99999] bg-black flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-6 absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/60 to-transparent">
         <button
@@ -124,14 +151,30 @@ const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
         >
           <X className="w-6 h-6" />
         </button>
-        <span className="text-white font-medium text-lg shadow-sm">Take Photo</span>
+        {/* <span className="text-white font-medium text-lg shadow-sm">Take Photo</span> */}
         {!capturedImage && (
-          <button
-            onClick={switchCamera}
-            className="w-12 h-12 rounded-full glass flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-          >
-            <SwitchCamera className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-2">
+            {devices.length > 0 && (
+              <Select value={selectedDeviceId} onValueChange={handleDeviceChange}>
+                <SelectTrigger className="w-[180px] bg-black/50 text-white border-white/20 backdrop-blur-md">
+                  <SelectValue placeholder="Select Camera" />
+                </SelectTrigger>
+                <SelectContent className="z-[100000]">
+                  {devices.map((device, index) => (
+                    <SelectItem key={device.deviceId || index} value={device.deviceId}>
+                      {device.label || `Camera ${index + 1}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <button
+              onClick={switchCamera}
+              className="w-12 h-12 rounded-full glass flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+            >
+              <SwitchCamera className="w-6 h-6" />
+            </button>
+          </div>
         )}
         {capturedImage && <div className="w-12" />}
       </div>
@@ -145,7 +188,7 @@ const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
               <p className="text-white mb-6">{error}</p>
               <Button
                 className="w-full glass-button text-white border-none"
-                onClick={() => startCamera(facingMode)}
+                onClick={() => startCamera(facingMode, selectedDeviceId)}
               >
                 Try Again
               </Button>
@@ -180,8 +223,8 @@ const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
         )}
 
         {/* Face guide overlay */}
-        {!capturedImage && !error && !isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+        {/* {!capturedImage && !error && !isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[100000]">
             <div className="relative w-[80vw] max-w-sm h-[60vh] max-h-[500px] border-2 border-dashed border-white/40 rounded-[45%] shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]">
                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-12 whitespace-nowrap">
                   <span className="text-white/90 text-sm font-medium bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-md">
@@ -190,7 +233,7 @@ const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
                </div>
             </div>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Controls */}
@@ -227,7 +270,8 @@ const CameraCapture = ({ onCapture, onClose }: CameraCaptureProps) => {
       </div>
 
       <canvas ref={canvasRef} className="hidden" />
-    </div>
+    </div>,
+    document.body
   );
 };
 
